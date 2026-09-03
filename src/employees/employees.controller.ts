@@ -17,6 +17,11 @@ export class EmployeesController {
     return this.employeesService.findAll();
   }
 
+  @Get('/test')
+  getFibonacci() {
+    return this.employeesService.getFibonnaci();
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.employeesService.findOne(+id);

@@ -44,4 +44,17 @@ export class EmployeesService {
     this.employees = this.employees.filter((employee) => employee.id !== id);
     return this.employees;
   }
+
+  getFibonnaci() {
+    const fibonacciNumbers : number[] = []
+
+    fibonacciNumbers.push(0, 1);
+
+    const n : number = 10;
+    for (let i : number = 2; i < n; i++) {
+      fibonacciNumbers[i] = fibonacciNumbers[i - 1] + fibonacciNumbers[i - 2];
+    }
+
+    return fibonacciNumbers;
+  }
 }
