@@ -1,13 +1,14 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateEmployeeDto } from './dto/create-employee.dto.js';
 import { UpdateEmployeeDto } from './dto/update-employee.dto.js';
+import { v4 as uuid } from "uuid";
 
 @Injectable()
 export class EmployeesService {
 
   private employees: CreateEmployeeDto[] = [
     {
-      id: 1,
+      id: uuid(),
       name: "Tristan",
       lastName: "Garcia",
       phoneNumber: "123971294"
@@ -23,12 +24,15 @@ export class EmployeesService {
     return this.employees;
   }
 
-  findOne(id: number) {
-    return this.employees.filter((employee) => employee.id == id)[0];
+  findOne(id: string) {
+    const employee = this.employees.filter((employee) => employee.id == id)[0];
+    if (!employee) throw new NotFoundException();
+    return employee;
   }
 
   // Preferi utilizar un nuevo data, para reemplazar completamente el anterior
-  update(id: number, createEmployeeDto: CreateEmployeeDto) { 
+  update(id: string, createEmployeeDto: CreateEmployeeDto) { 
+    this.findOne(id);
     this.employees = this.employees.map((employee) => {
       if (employee.id === id) {
         return createEmployeeDto;
@@ -40,7 +44,8 @@ export class EmployeesService {
     return this.employees;
   }
 
-  remove(id: number) {
+  remove(id: string) {
+    this.findOne(id);
     this.employees = this.employees.filter((employee) => employee.id !== id);
     return this.employees;
   }
