@@ -1,62 +1,55 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { Employee } from './entities/employee.entity.js';
 import { CreateEmployeeDto } from './dto/create-employee.dto.js';
 import { UpdateEmployeeDto } from './dto/update-employee.dto.js';
-import { v4 as uuid } from "uuid";
 
 @Injectable()
 export class EmployeesService {
+  constructor(
+    @InjectRepository(Employee)
+    private readonly employeeRepository: Repository<Employee>,
+  ) {}
 
-  private employees: CreateEmployeeDto[] = [
-    {
-      id: uuid(),
-      name: "Tristan",
-      lastName: "Garcia",
-      phoneNumber: "123971294"
-    }
-  ];
-
-  create(createEmployeeDto: CreateEmployeeDto) {
-    this.employees.push(createEmployeeDto);
-    return this.employees;
+  async create(createEmployeeDto: CreateEmployeeDto) {
+    const employee = this.employeeRepository.create(createEmployeeDto);
+    await this.employeeRepository.save(employee);
+    return this.findOne(employee.employeeId);
   }
 
-  findAll() {
-    return this.employees;
+  async findAll() {
+    return this.employeeRepository.find();
   }
 
-  findOne(id: string) {
-    const employee = this.employees.filter((employee) => employee.id == id)[0];
-    if (!employee) throw new NotFoundException();
+  async findOne(id: string) {
+    const employee = await this.employeeRepository.findOneBy({ employeeId: id });
+    if (!employee) throw new NotFoundException('Employee not found');
     return employee;
   }
 
-  // Preferi utilizar un nuevo data, para reemplazar completamente el anterior
-  update(id: string, createEmployeeDto: CreateEmployeeDto) { 
-    this.findOne(id);
-    this.employees = this.employees.map((employee) => {
-      if (employee.id === id) {
-        return createEmployeeDto;
-      }
-
-      return employee;
+  async update(id: string, updateEmployeeDto: UpdateEmployeeDto) {
+    const employeeToUpdate = await this.employeeRepository.preload({
+      employeeId: id,
+      ...updateEmployeeDto,
     });
-
-    return this.employees;
+    if (!employeeToUpdate) throw new NotFoundException('Employee not found');
+    await this.employeeRepository.save(employeeToUpdate);
+    return employeeToUpdate;
   }
 
-  remove(id: string) {
-    this.findOne(id);
-    this.employees = this.employees.filter((employee) => employee.id !== id);
-    return this.employees;
+  async remove(id: string) {
+    const employee = await this.findOne(id);
+    await this.employeeRepository.delete({ employeeId: id });
+    return { message: 'Employee deleted', employee };
   }
 
   getFibonnaci() {
-    const fibonacciNumbers : number[] = []
-
+    const fibonacciNumbers: number[] = [];
     fibonacciNumbers.push(0, 1);
 
-    const n : number = 10;
-    for (let i : number = 2; i < n; i++) {
+    const n: number = 10;
+    for (let i: number = 2; i < n; i++) {
       fibonacciNumbers[i] = fibonacciNumbers[i - 1] + fibonacciNumbers[i - 2];
     }
 
