@@ -1,8 +1,9 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, ParseUUIDPipe } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, ParseUUIDPipe, UseInterceptors, UploadedFile } from '@nestjs/common';
 import { EmployeesService } from './employees.service.js';
 import { CreateEmployeeDto } from './dto/create-employee.dto.js';
 import { UpdateEmployeeDto } from './dto/update-employee.dto.js';
 import { version } from 'os';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 @Controller('employees')
 export class EmployeesController {
@@ -21,6 +22,15 @@ export class EmployeesController {
   @Get('/test')
   getFibonacci() {
     return this.employeesService.getFibonnaci();
+  }
+
+  @Post("upload")
+  @UseInterceptors(FileInterceptor("file" , {
+    dest: "./src/employees/employees-photos"
+  }))
+  uploadPhoto(@UploadedFile() file: any) { // any por que mi multer no jala
+    console.log(file);
+    return 'OK';
   }
 
   @Get(':id')
