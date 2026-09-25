@@ -8,6 +8,8 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from "@nestjs/config";
 import { ProvidersModule } from './providers/providers.module.js';
 import { LocationsModule } from './locations/locations.module.js';
+import { RegionsModule } from './regions/regions.module.js';
+import { ManagersModule } from './managers/managers.module.js';
 
 export const { ObserveModule, ObserveInstrument } = createObserveModule();
 
@@ -30,6 +32,8 @@ export const { ObserveModule, ObserveInstrument } = createObserveModule();
     ProductsModule,
     ProvidersModule,
     LocationsModule,
+    RegionsModule,
+    ManagersModule,
   ],
 
   controllers: [AppController],
