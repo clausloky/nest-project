@@ -10,6 +10,8 @@ import { ProvidersModule } from './providers/providers.module.js';
 import { LocationsModule } from './locations/locations.module.js';
 import { RegionsModule } from './regions/regions.module.js';
 import { ManagersModule } from './managers/managers.module.js';
+import { JwtModule } from '@nestjs/jwt';
+import { JWT_KEY, EXPIRES_IN } from './auth/constants/jwt.constants.js';
 import { AuthModule } from './auth/auth.module.js';
 
 export const { ObserveModule, ObserveInstrument } = createObserveModule();
@@ -35,7 +37,7 @@ export const { ObserveModule, ObserveInstrument } = createObserveModule();
     LocationsModule,
     RegionsModule,
     ManagersModule,
-    AuthModule,
+    AuthModule
   ],
 
   controllers: [AppController],

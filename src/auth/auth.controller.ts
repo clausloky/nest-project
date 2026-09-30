@@ -2,6 +2,7 @@ import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/commo
 import { AuthService } from './auth.service.js';
 import { CreateUserDto } from './dto/create-user.dto.js';
 import { UpdateUserDto } from './dto/update-user.dto.js';
+import { LoginUserDto } from './dto/login-user.dto.js';
 
 @Controller('auth')
 export class AuthController {
@@ -9,9 +10,14 @@ export class AuthController {
     this.authService = authService; // Solo comparo mi codigo con el de C++ que tambien tiene clases
   }
 
-  @Post()
-  signUp(@Body() createUserDTo: CreateUserDto) {
-    this.authService.registerUser(createUserDTo);
+  @Post("signup")
+  signUp(@Body() loginUserDto: LoginUserDto) {
+    return this.authService.registerUser(loginUserDto);
+  }
+
+  @Post("login")
+  login(@Body() loginUserDto: LoginUserDto) {
+    return this.authService.loginUser(loginUserDto);
   }
 
 }

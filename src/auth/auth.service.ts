@@ -1,11 +1,13 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto.js';
 import { UpdateUserDto } from './dto/update-user.dto.js';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './entities/user.entity.js';
 import * as bcrypt from "bcrypt";
-import * as jwt from "jsonwebtoken";
+import { JwtService } from '@nestjs/jwt';
+import { LoginUserDto } from './dto/login-user.dto.js';
+import { NotFoundError } from 'rxjs';
 
 const saltRounds = 5;
 
@@ -13,7 +15,8 @@ const saltRounds = 5;
 export class AuthService {
   constructor(
     @InjectRepository(User)
-    private readonly userRepository: Repository<User>
+    private readonly userRepository: Repository<User>,
+    private jwtService: JwtService
 ) {}
 
   registerUser(createUserDTo: CreateUserDto) {
@@ -21,18 +24,27 @@ export class AuthService {
     return this.userRepository.save(createUserDTo);
   }
 
-  async loginUser(createUserDTO: CreateUserDto) {
+  async loginUser(loginUserDto: LoginUserDto) {
     const user = await this.userRepository.findOne({
       where: {
-        userEmail: createUserDTO.userEmail
+        userEmail: loginUserDto.userEmail
       }
     });
 
-    const match = bcrypt.compare(createUserDTO.userPassword, createUserDTO.userPassword);
+    if (!user) throw new NotFoundException("No se encontro el usuario.");
+
+    const match = await bcrypt.compare(loginUserDto.userPassword, user.userPassword);
+
+    console.log(user, loginUserDto);
+
     if (!match) throw new UnauthorizedException("No esta autorizado.");
+    const payload = {
+      userEmail: user?.userEmail,
+      userPassword: user?.userPassword,
+      userRoles: user?.userRoles
+    }
+    const token = this.jwtService.sign(payload);
 
-    const token = jwt.sign(JSON.stringify(user), "SECRET");
-
-    return {ok: true, message: "Login con exito."} // Preferi hacerlo asi por que en mi server express lo solia hacer asi
+    return {ok: true, message: "Login con exito.", token} // Preferi hacerlo asi por que en mi server express lo solia hacer asi
   }
 }

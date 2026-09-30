@@ -4,15 +4,17 @@ import { AuthController } from './auth.controller.js';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from './entities/user.entity.js';
 import { JwtModule } from '@nestjs/jwt';
+import { EXPIRES_IN, JWT_KEY } from './constants/jwt.constants.js';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([User]),
     JwtModule.register({
-      secret: 'SECRET',
-      signOptions: { expiresIn: '1h' }, // Los tokens expiran en 1 hora
-      global: true, // hace que el servicio JWT esté disponible en toda la app
-    }),
+      secret: JWT_KEY,
+      signOptions: {
+        expiresIn: EXPIRES_IN
+      }
+    })
   ],
   controllers: [AuthController],
   providers: [AuthService],
