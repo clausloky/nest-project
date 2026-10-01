@@ -7,7 +7,6 @@ import { User } from './entities/user.entity.js';
 import * as bcrypt from "bcrypt";
 import { JwtService } from '@nestjs/jwt';
 import { LoginUserDto } from './dto/login-user.dto.js';
-import { NotFoundError } from 'rxjs';
 
 const saltRounds = 5;
 
@@ -46,5 +45,17 @@ export class AuthService {
     const token = this.jwtService.sign(payload);
 
     return {ok: true, message: "Login con exito.", token} // Preferi hacerlo asi por que en mi server express lo solia hacer asi
+  }
+
+  async updateUser(userEmail: string, updateUserDto: UpdateUserDto) {
+    const newUserData = await this.userRepository.preload({
+      userEmail: userEmail,
+      ...updateUserDto
+    });
+
+    if (!newUserData) throw new NotFoundException("No se encontro el usuario");
+
+    this.userRepository.save(newUserData);
+    return newUserData;
   }
 }

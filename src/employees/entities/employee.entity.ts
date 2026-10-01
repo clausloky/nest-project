@@ -1,5 +1,6 @@
-import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, JoinColumn, ManyToOne, OneToOne, PrimaryGeneratedColumn } from "typeorm";
 import { Location } from "../../locations/entities/location.entity.js";
+import { User } from "../../auth/entities/user.entity.js";
 
 @Entity()
 export class Employee {
@@ -7,24 +8,30 @@ export class Employee {
     employeeId: string;
 
     @Column('text')
-    name: string;
+    providerName: string;
 
     @Column('text')
-    lastName: string;
+    providerLastName: string;
 
     @Column('text')
-    phoneNumber: string;
+    providerPhoneNumber: string;
 
-    @Column('text')
-    email: string;
+    @Column('text', {
+        unique: true
+    })
+    providerEmail: string;
 
     @Column({
         type: "text",
         nullable: true
     })
-    photoUrl: string;
+    providerPhotoUrl: string;
 
     @ManyToOne("Location", (location: Location) => location.employees)
     @JoinColumn({name: "locationId"})
     location: Location;
+
+    @OneToOne(() => User)
+    @JoinColumn({name: "userId"})
+    user: User;
 }
