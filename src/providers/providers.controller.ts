@@ -5,17 +5,20 @@ import { UpdateProviderDto } from './dto/update-provider.dto.js';
 import { UserData } from '../auth/decorators/user.decorator.js';
 import { User } from '../auth/entities/user.entity.js';
 import { Auth } from '../auth/decorators/auth.decorator.js';
+import { ROLES } from '../auth/constants/roles.constants.js';
 
 @Controller('providers')
 export class ProvidersController {
   constructor(private readonly providersService: ProvidersService) {}
 
+  
+  @Auth(ROLES.EMPLOYEE)
   @Post()
   create(@Body() createProviderDto: CreateProviderDto) {
     return this.providersService.create(createProviderDto);
   }
 
-  @Auth(["Admin"])
+  @Auth(ROLES.EMPLOYEE, ROLES.MANAGER)
   @Get()
   findAll(@UserData() user: User) {
     if (user.userRoles?.includes("Employee")) throw new UnauthorizedException("No autorizado, solo admins.");
@@ -23,7 +26,7 @@ export class ProvidersController {
     return this.providersService.findAll();
   }
 
-  // 🔎 Nuevo endpoint: buscar por nombre
+  @Auth(ROLES.EMPLOYEE, ROLES.MANAGER)
   @Get('name/:name')
   async findByName(@Param('name') name: string) {
     const provider = await this.providersService.findByName(name);
@@ -31,18 +34,22 @@ export class ProvidersController {
     return provider;
   }
 
+  
+  @Auth(ROLES.EMPLOYEE, ROLES.MANAGER)
   @Get(':id')
   async findOne(@Param('id') id: string) {
     const provider = await this.providersService.findOne(id);
     if (!provider) throw new NotFoundException(`Provider with id ${id} not found`);
     return provider;
   }
-
+  
+  @Auth(ROLES.MANAGER)
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateProviderDto: UpdateProviderDto) {
     return this.providersService.update(id, updateProviderDto);
   }
-
+  
+  @Auth(ROLES.MANAGER)
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.providersService.remove(id);
