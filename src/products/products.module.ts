@@ -7,9 +7,13 @@ import { ProductsController } from './products.controller.js';
 
 import { Product } from './entities/product.entity.js';
 import { Provider } from '../providers/entities/provider.entity.js';
+import { AuthModule } from '../auth/auth.module.js';
+import { AuthGuard } from '../auth/guards/auth.guard.js';
+import { RolesGuard } from '../auth/guards/roles.guard.js';
 
 @Module({
   imports: [
+    AuthModule,
     TypeOrmModule.forFeature([
       Product,
       Provider,
@@ -18,6 +22,6 @@ import { Provider } from '../providers/entities/provider.entity.js';
 
   controllers: [ProductsController],
 
-  providers: [ProductsService],
+  providers: [ProductsService, AuthGuard, RolesGuard],
 })
 export class ProductsModule {}

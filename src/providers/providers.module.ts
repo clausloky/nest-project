@@ -5,9 +5,13 @@ import { Provider } from './entities/provider.entity.js';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { JwtModule } from '@nestjs/jwt';
 import { JWT_KEY, EXPIRES_IN } from '../auth/constants/jwt.constants.js';
+import { AuthModule } from '../auth/auth.module.js';
+import { AuthGuard } from '../auth/guards/auth.guard.js';
+import { RolesGuard } from '../auth/guards/roles.guard.js';
 
 @Module({
   imports: [
+    AuthModule,
     TypeOrmModule.forFeature([Provider]),
     JwtModule.register({
       secret: JWT_KEY,
@@ -17,6 +21,6 @@ import { JWT_KEY, EXPIRES_IN } from '../auth/constants/jwt.constants.js';
     }),
   ],
   controllers: [ProvidersController],
-  providers: [ProvidersService],
+  providers: [ProvidersService, AuthGuard, RolesGuard],
 })
 export class ProvidersModule {}

@@ -29,6 +29,7 @@ export class Employee {
 
     @ManyToOne("Location", (location: Location) => location.employees)
     @JoinColumn({name: "locationId"})
+    @Column({ type: 'jsonb', nullable: true })
     location: Location;
 
     @OneToOne(() => User)

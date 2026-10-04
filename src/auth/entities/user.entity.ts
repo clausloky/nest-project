@@ -1,6 +1,6 @@
 import { Column, Entity, OneToOne, PrimaryGeneratedColumn } from "typeorm";
-import { Manager } from "../../managers/entities/manager.entity.js";
-import { Employee } from "../../employees/entities/employee.entity.js";
+import type { Manager } from "../../managers/entities/manager.entity.js";
+import type { Employee } from "../../employees/entities/employee.entity.js";
 
 @Entity()
 export class User {
@@ -17,9 +17,9 @@ export class User {
     })
     userRoles: string[]
 
-    @OneToOne(() => Manager, {eager: true})
+    @OneToOne("Manager", {eager: true})
     manager: Manager;
 
-    @OneToOne(() => Employee, {eager: true}) 
+    @OneToOne("Employee", {eager: true})
     employee: Employee;
 }
