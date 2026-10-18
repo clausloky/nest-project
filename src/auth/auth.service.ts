@@ -36,15 +36,16 @@ export class AuthService {
 
     if (!match) throw new UnauthorizedException("No esta autorizado.");
 
-    
+
     const payload = {
-      userEmail: user?.userEmail,
-      userPassword: user?.userPassword,
-      userRoles: user?.userRoles
+      sub: user.userId,
+      username: user.userEmail,
+      roles: user.userRoles.map((role) => role.toLowerCase()),
+      userRoles: user.userRoles,
     }
     const token = this.jwtService.sign(payload);
 
-    return {ok: true, message: "Login con exito.", token} // Preferi hacerlo asi por que en mi server express lo solia hacer asi
+    return { ok: true, message: "Login con exito.", token };
   }
 
   async updateUser(userEmail: string, updateUserDto: UpdateUserDto) {

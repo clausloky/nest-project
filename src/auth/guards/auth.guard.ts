@@ -27,10 +27,12 @@ export class AuthGuard implements CanActivate {
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest<AuthenticatedRequest>();
-    const token = this.extractTokenFromHeader(request);
+    let token = this.extractTokenFromHeader(request);
 
     if (!token) {
-      throw new UnauthorizedException('Token no encontrado');
+      token = request.cookies?.token;
+
+      if (!token) throw new UnauthorizedException("No token");
     }
 
     try {
@@ -47,7 +49,7 @@ export class AuthGuard implements CanActivate {
       }
 
       request.user = payload;
-    } catch (err) {
+    } catch {
       throw new UnauthorizedException('Token inválido');
     }
 

@@ -2,14 +2,17 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule, ObserveInstrument } from './app.module.js';
 import { ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import cookieParser from 'cookie-parser';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
     instrument: ObserveInstrument,
     cors: {
-      origin: process.env.ALLOWED_ORIGIN
+      origin: process.env.ALLOWED_ORIGIN,
+      credentials: true
     }
   });
+  app.use(cookieParser());
 
   const config = new DocumentBuilder()
     .setTitle('API Ocso')
