@@ -30,13 +30,13 @@ export class AuthService {
       }
     });
 
-    if (!user) throw new NotFoundException("No se encontro el usuario.");
+    if (!user) throw new UnauthorizedException("No se encontro el usuario.");
 
     const match = await bcrypt.compare(loginUserDto.userPassword, user.userPassword);
 
-    console.log(user, loginUserDto);
-
     if (!match) throw new UnauthorizedException("No esta autorizado.");
+
+    
     const payload = {
       userEmail: user?.userEmail,
       userPassword: user?.userPassword,
