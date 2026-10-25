@@ -24,6 +24,12 @@ export class EmployeesService {
     return this.employeeRepository.find();
   }
 
+  async findByLocation(locationId: number) {
+    return this.employeeRepository.find({
+      where: { location: { locationId } },
+    });
+  }
+
   async findOne(id: string) {
     const employee = await this.employeeRepository.findOneBy({ employeeId: id });
     if (!employee) throw new NotFoundException('Employee not found');

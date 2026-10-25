@@ -19,7 +19,7 @@ export class LocationsController {
     return this.locationsService.create(createLocationDto);
   }
 
-  @Auth(ROLES.MANAGER, ROLES.ADMIN)
+  @Auth(ROLES.MANAGER, ROLES.ADMIN, ROLES.EMPLOYEE)
   @Get()
   findAll() {
     return this.locationsService.findAll();

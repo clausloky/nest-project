@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, ParseUUIDPipe, UseInterceptors, UploadedFile } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe, ParseUUIDPipe, UseInterceptors, UploadedFile } from '@nestjs/common';
 import { EmployeesService } from './employees.service.js';
 import { CreateEmployeeDto } from './dto/create-employee.dto.js';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -23,6 +23,14 @@ export class EmployeesController {
   @Get()
   findAll() {
     return this.employeesService.findAll();
+  }
+
+  @Auth(ROLES.MANAGER)
+  @Get('location/:locationId')
+  findByLocation(
+    @Param('locationId', ParseIntPipe) locationId: number,
+  ) {
+    return this.employeesService.findByLocation(locationId);
   }
 
   @Auth(ROLES.MANAGER, ROLES.EMPLOYEE)

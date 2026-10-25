@@ -9,24 +9,24 @@ export class Employee {
     employeeId: string;
 
     @Column('text')
-    providerName: string;
+    employeeName: string;
 
     @Column('text')
-    providerLastName: string;
+    employeeLastName: string;
 
     @Column('text')
-    providerPhoneNumber: string;
+    employeePhoneNumber: string;
 
     @Column('text', {
         unique: true
     })
-    providerEmail: string;
+    employeeEmail: string;
 
     @Column({
         type: "text",
         nullable: true
     })
-    providerPhotoUrl: string;
+    employeePhotoUrl: string;
 
     @ManyToOne("Location", (location: Location) => location.employees)
     @JoinColumn({name: "locationId"})

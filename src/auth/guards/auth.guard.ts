@@ -3,7 +3,6 @@ import {
   ExecutionContext,
   Injectable,
   UnauthorizedException,
-  ForbiddenException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { Request } from 'express';
@@ -42,10 +41,6 @@ export class AuthGuard implements CanActivate {
 
       if (payload.exp && Date.now() >= payload.exp * 1000) {
         throw new UnauthorizedException('Token expirado');
-      }
-
-      if (payload.roles && !payload.roles.includes('admin')) {
-        throw new ForbiddenException('No tienes permisos suficientes');
       }
 
       request.user = payload;
