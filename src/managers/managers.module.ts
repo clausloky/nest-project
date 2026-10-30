@@ -11,5 +11,6 @@ import { RolesGuard } from '../auth/guards/roles.guard.js';
   imports: [AuthModule, TypeOrmModule.forFeature([Manager])],
   controllers: [ManagersController],
   providers: [ManagersService, AuthGuard, RolesGuard],
+  exports: [ManagersModule]
 })
 export class ManagersModule {}
