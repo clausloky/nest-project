@@ -19,6 +19,5 @@ export class CreateProductDto {
   countSeal: number;
   
   @IsString()
-  @IsUUID("4")
-  provider: Provider;
+  provider: Provider | string;
 }

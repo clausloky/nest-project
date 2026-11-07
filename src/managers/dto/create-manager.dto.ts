@@ -1,10 +1,12 @@
 import {
   IsEmail,
   IsNumber,
+  IsObject,
   IsOptional,
   IsString,
   MaxLength,
 } from "class-validator";
+import { Type } from "class-transformer";
 import { Location } from "../../locations/entities/location.entity.js";
 
 export class CreateManagerDto {
@@ -16,6 +18,7 @@ export class CreateManagerDto {
   @IsEmail()
   managerEmail: string;
 
+  @Type(() => Number)
   @IsNumber()
   managerSalary: number;
 
@@ -23,7 +26,7 @@ export class CreateManagerDto {
   @MaxLength(16)
   managerPhoneNumber: string;
 
-  @IsNumber()
+  @IsObject()
   @IsOptional()
   location: Location;
 }

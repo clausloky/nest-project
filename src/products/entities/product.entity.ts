@@ -16,5 +16,5 @@ export class Product {
   countSeal: number;
 
   @ManyToOne(() => Provider, (provider) => provider.products)
-  provider: Provider;
+  provider: Provider | string;
 }

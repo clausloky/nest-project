@@ -20,12 +20,22 @@ export class ProductsService {
   ) {}
 
   async create(createProductDto: CreateProductDto) {
+    const providerId =
+      typeof createProductDto.provider === 'string'
+        ? createProductDto.provider
+        : createProductDto.provider.providerId;
+    const provider = await this.providerRepository.findOneBy({ providerId });
+
+    if (!provider) {
+      throw new NotFoundException(`Proveedor con id ${providerId} no encontrado`);
+    }
 
     const product = this.productRepository.create({
       productId: uuid(),
       productName: createProductDto.productName,
       price: createProductDto.price,
-      countSeal: createProductDto.countSeal
+      countSeal: createProductDto.countSeal,
+      provider,
     });
 
     return await this.productRepository.save(product);
@@ -41,13 +51,17 @@ export class ProductsService {
 
   async findOne(id: string) {
     const product = await this.productRepository.findOne({
-      where: { productId: id },
+      where: {
+        productId: id,
+      },
       relations: {
         provider: true,
       },
     });
 
-    if (!product) throw new NotFoundException();
+    if (!product) {
+      throw new NotFoundException(`Producto con id ${id} no encontrado`);
+    }
 
     return product;
   }
@@ -69,17 +83,27 @@ export class ProductsService {
     return products;
   }
 
+  
   async update(id: string, updateProductDto: UpdateProductDto) {
     const product = await this.findOne(id);
 
     if (updateProductDto.provider) {
-      // const provider = await this.providerRepository.findOneBy({
-      //   provider: updateProductDto.provider,
-      // });
+      const providerId =
+        typeof updateProductDto.provider === "string"
+          ? updateProductDto.provider
+          : updateProductDto.provider.providerId;
 
-      // if (!provider) throw new NotFoundException('Provider not found');
+      const provider = await this.providerRepository.findOneBy({
+        providerId,
+      });
 
-      // product.provider = provider;
+      if (!provider) {
+        throw new NotFoundException(
+          `Proveedor con id ${providerId} no encontrado`
+        );
+      }
+
+      product.provider = provider;
     }
 
     Object.assign(product, {
@@ -90,6 +114,7 @@ export class ProductsService {
 
     return await this.productRepository.save(product);
   }
+
 
   async remove(id: string) {
     await this.findOne(id);
