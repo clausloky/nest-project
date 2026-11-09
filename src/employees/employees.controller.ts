@@ -6,12 +6,14 @@ import { Auth } from '../auth/decorators/auth.decorator.js';
 import { ROLES } from '../auth/constants/roles.constants.js';
 import { ApiAuth } from '../auth/decorators/api.decorator.js';
 import { ApiTags } from '@nestjs/swagger';
+import { AwsService } from '../aws/aws.service.js';
+import { FILE } from 'dns';
 
 @ApiTags("Employees")
 @ApiAuth()
 @Controller('employees')
 export class EmployeesController {
-  constructor(private readonly employeesService: EmployeesService) {}
+  constructor(private readonly employeesService: EmployeesService, private readonly awsService: AwsService) {}
 
   @Auth(ROLES.MANAGER)
   @Post()
@@ -34,13 +36,17 @@ export class EmployeesController {
   }
 
   @Auth(ROLES.MANAGER, ROLES.EMPLOYEE)
-  @Post("upload")
-  @UseInterceptors(FileInterceptor("file" , {
-    dest: "./src/employees/employees-photos"
-  }))
-  uploadPhoto(@UploadedFile() file: any) { // any por que mi multer no jala
-    console.log(file);
-    return 'OK';
+  @Post(":id/upload")
+  @UseInterceptors(FileInterceptor("file"))
+  async uploadPhoto(
+    @Param('id') id: string,
+    @UploadedFile() file: Express.Multer.File,
+  ) {
+    const response = await this.awsService.uploadFile(file)
+
+    return this.employeesService.update(id, {
+      employeePhoto: response,
+    })
   }
 
   @Auth(ROLES.MANAGER)

@@ -6,9 +6,10 @@ import { Employee } from './entities/employee.entity.js';
 import { AuthModule } from '../auth/auth.module.js';
 import { AuthGuard } from '../auth/guards/auth.guard.js';
 import { RolesGuard } from '../auth/guards/roles.guard.js';
+import { AwsModule } from '../aws/aws.module.js';
 
 @Module({
-  imports: [AuthModule, TypeOrmModule.forFeature([Employee])],
+  imports: [AuthModule, TypeOrmModule.forFeature([Employee]), AwsModule],
   controllers: [EmployeesController],
   providers: [EmployeesService, AuthGuard, RolesGuard],
 })

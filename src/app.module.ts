@@ -9,6 +9,7 @@ import { LocationsModule } from './locations/locations.module.js';
 import { RegionsModule } from './regions/regions.module.js';
 import { ManagersModule } from './managers/managers.module.js';
 import { AuthModule } from './auth/auth.module.js';
+import { AwsModule } from './aws/aws.module.js';
 
 export const { ObserveModule, ObserveInstrument } = createObserveModule();
 
@@ -33,7 +34,8 @@ export const { ObserveModule, ObserveInstrument } = createObserveModule();
     LocationsModule,
     RegionsModule,
     ManagersModule,
-    AuthModule
+    AuthModule,
+    AwsModule
   ],
 
   controllers: [],

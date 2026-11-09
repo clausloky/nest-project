@@ -28,4 +28,8 @@ export class CreateEmployeeDto {
   @ValidateNested()
   @Type(() => Location)
   location?: Location;
+
+  @IsString()
+  @IsOptional()
+  employeePhoto: string
 }
