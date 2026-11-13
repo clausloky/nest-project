@@ -5,6 +5,8 @@ import { LoginUserDto } from './dto/login-user.dto.js';
 import { ApiAuth } from '../auth/decorators/api.decorator.js';
 import { ApiTags } from '@nestjs/swagger';
 import type { Response } from 'express';
+import { BadRequestException } from '@nestjs/common';
+import { CreateUserDto } from './dto/create-user.dto.js';
 
 @ApiTags("Employees")
 @ApiAuth()
@@ -14,9 +16,40 @@ export class AuthController {
 
   constructor(private readonly authService: AuthService) {}
 
-  @Post("signup")
-  signUp(@Body() loginUserDto: LoginUserDto) {
-    return this.authService.registerUser(loginUserDto);
+  @Post("register/employee/:id")
+  registerEmployee(
+    @Body() createUserDto: CreateUserDto,
+    @Param("id") id: string,
+  ) {
+    if (
+      !createUserDto.userRoles.includes("Admin") &&
+      !createUserDto.userRoles.includes("Employee")
+    ) {
+      throw new BadRequestException("Rol inválido");
+    }
+
+    return this.authService.registerEmployee(
+      id,
+      createUserDto,
+    );
+  }
+
+  @Post("register/manager/:id")
+  registerManager(
+    @Body() createUserDto: CreateUserDto,
+    @Param("id") id: string,
+  ) {
+    if (
+      !createUserDto.userRoles.includes("Admin") &&
+      !createUserDto.userRoles.includes("Manager")
+    ) {
+      throw new BadRequestException("Rol inválido");
+    }
+
+    return this.authService.registerManager(
+      id,
+      createUserDto,
+    );
   }
 
   @Post("login")

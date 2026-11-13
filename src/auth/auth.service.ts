@@ -4,6 +4,8 @@ import { UpdateUserDto } from './dto/update-user.dto.js';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './entities/user.entity.js';
+import { Employee } from '../employees/entities/employee.entity.js';
+import { Manager } from '../managers/entities/manager.entity.js';
 import * as bcrypt from "bcrypt";
 import { JwtService } from '@nestjs/jwt';
 import { LoginUserDto } from './dto/login-user.dto.js';
@@ -13,14 +15,68 @@ const saltRounds = 5;
 @Injectable()
 export class AuthService {
   constructor(
-    @InjectRepository(User)
-    private readonly userRepository: Repository<User>,
-    private jwtService: JwtService
+  @InjectRepository(User)
+  private userRepository: Repository<User>,
+
+  @InjectRepository(Employee)
+  private employeeRepository: Repository<Employee>,
+
+  @InjectRepository(Manager)
+  private managerRepository: Repository<Manager>,
+
+  private jwtService: JwtService,
 ) {}
 
-  registerUser(createUserDTo: CreateUserDto) {
-    createUserDTo.userPassword = bcrypt.hashSync(createUserDTo.userPassword, saltRounds)
-    return this.userRepository.save(createUserDTo);
+  async registerEmployee(
+    id: string,
+    createUserDto: CreateUserDto,
+  ) {
+    createUserDto.userPassword = bcrypt.hashSync(
+      createUserDto.userPassword,
+      5,
+    );
+
+    const user = await this.userRepository.save(createUserDto);
+
+    const employeeToUpdate = await this.employeeRepository.preload({
+      employeeId: id,
+    });
+
+    if (!employeeToUpdate) {
+      throw new NotFoundException('Employee not found');
+    }
+
+    employeeToUpdate.user = user;
+
+    return this.employeeRepository.save(employeeToUpdate);
+  }
+
+  async registerManager(
+    id: string,
+    createUserDto: CreateUserDto,
+  ) {
+    createUserDto.userPassword = bcrypt.hashSync(
+      createUserDto.userPassword,
+      5,
+    );
+
+    const user = await this.userRepository.save(
+      createUserDto,
+    );
+
+    const manager = await this.managerRepository.preload({
+      managerId: id,
+    });
+
+    if (!manager) {
+      throw new NotFoundException('Manager not found');
+    }
+
+    manager.user = user;
+
+    return this.managerRepository.save(
+      manager,
+    );
   }
 
   async loginUser(loginUserDto: LoginUserDto) {

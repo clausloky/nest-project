@@ -1,13 +1,13 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe, ParseUUIDPipe, UseInterceptors, UploadedFile } from '@nestjs/common';
+import { BadRequestException, Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe, ParseUUIDPipe, UseInterceptors, UploadedFile } from '@nestjs/common';
 import { EmployeesService } from './employees.service.js';
 import { CreateEmployeeDto } from './dto/create-employee.dto.js';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Auth } from '../auth/decorators/auth.decorator.js';
 import { ROLES } from '../auth/constants/roles.constants.js';
 import { ApiAuth } from '../auth/decorators/api.decorator.js';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiBody, ApiConsumes, ApiTags } from '@nestjs/swagger';
 import { AwsService } from '../aws/aws.service.js';
-import { FILE } from 'dns';
+import { UpdateEmployeeDto } from './dto/update-employee.dto.js';
 
 @ApiTags("Employees")
 @ApiAuth()
@@ -17,7 +17,15 @@ export class EmployeesController {
 
   @Auth(ROLES.MANAGER)
   @Post()
-  create(@Body() createEmployeeDto: CreateEmployeeDto) {
+  @UseInterceptors(FileInterceptor("employeePhoto"))
+  async create(
+    @Body() createEmployeeDto: CreateEmployeeDto,
+    @UploadedFile() file: Express.Multer.File,
+  ) {
+    if (file) {
+      createEmployeeDto.employeePhotoUrl = await this.awsService.uploadFile(file);
+    }
+
     return this.employeesService.create(createEmployeeDto);
   }
 
@@ -36,17 +44,32 @@ export class EmployeesController {
   }
 
   @Auth(ROLES.MANAGER, ROLES.EMPLOYEE)
-  @Post(":id/upload")
-  @UseInterceptors(FileInterceptor("file"))
+  @Post(':id/upload')
+  @UseInterceptors(FileInterceptor('file'))
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        file: { type: 'string', format: 'binary' },
+      },
+      required: ['file'],
+    },
+  })
   async uploadPhoto(
-    @Param('id') id: string,
+    @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
     @UploadedFile() file: Express.Multer.File,
   ) {
-    const response = await this.awsService.uploadFile(file)
+    if (!file) {
+      throw new BadRequestException('Photo file is required');
+    }
 
-    return this.employeesService.update(id, {
-      employeePhoto: response,
-    })
+    const photoUrl = await this.awsService.uploadFile(file);
+    const employee = await this.employeesService.update(id, {
+      employeePhotoUrl: photoUrl,
+    });
+
+    return { photoUrl: employee.employeePhotoUrl };
   }
 
   @Auth(ROLES.MANAGER)
@@ -57,9 +80,19 @@ export class EmployeesController {
     return this.employeesService.findOne(id);
   }
 
-  @Patch(':id') // Preferi utilizar un nuevo data, para reemplazar completamente el anterior
-  update(@Param('id', new ParseUUIDPipe({version: '4'})) id: string, @Body() CreateEmployeeDto: CreateEmployeeDto) {
-    return this.employeesService.update(id, CreateEmployeeDto);
+  @Auth(ROLES.MANAGER)
+  @UseInterceptors(FileInterceptor("employeePhoto"))
+  @Patch("/:id")
+  async update(
+    @Param("id", new ParseUUIDPipe({ version: "4" })) id: string,
+    @Body() updateEmployeeDto: UpdateEmployeeDto,
+    @UploadedFile() file: Express.Multer.File | undefined,
+  ) {
+    if (file) {
+      updateEmployeeDto.employeePhotoUrl = await this.awsService.uploadFile(file);
+    }
+
+    return this.employeesService.update(id, updateEmployeeDto);
   }
 
   @Delete(':id')

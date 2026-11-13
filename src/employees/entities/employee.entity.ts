@@ -28,10 +28,12 @@ export class Employee {
     })
     employeePhotoUrl: string;
 
-    @ManyToOne("Location", (location: Location) => location.employees)
+    @ManyToOne("Location", (location: Location) => location.employees, { nullable: true })
     @JoinColumn({name: "locationId"})
-    @Column({ type: 'jsonb', nullable: true })
-    location: Location;
+    location: Location | null;
+
+    @Column({ type: "jsonb", nullable: true, name: "location" })
+    legacyLocation: string | number | { locationId?: number } | null;
 
     @OneToOne(() => User)
     @JoinColumn({name: "userId"})
