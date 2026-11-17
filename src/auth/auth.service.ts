@@ -31,6 +31,7 @@ export class AuthService {
     id: string,
     createUserDto: CreateUserDto,
   ) {
+    createUserDto.userRoles = ["Employee"];
     createUserDto.userPassword = bcrypt.hashSync(
       createUserDto.userPassword,
       5,
@@ -55,6 +56,7 @@ export class AuthService {
     id: string,
     createUserDto: CreateUserDto,
   ) {
+    createUserDto.userRoles = ["Manager"];
     createUserDto.userPassword = bcrypt.hashSync(
       createUserDto.userPassword,
       5,
@@ -104,15 +106,25 @@ export class AuthService {
     return { ok: true, message: "Login con exito.", token };
   }
 
-  async updateUser(userEmail: string, updateUserDto: UpdateUserDto) {
+  async updateUser(id: string, updateUserDto: UpdateUserDto) {
+    if (updateUserDto.userPassword) {
+      updateUserDto.userPassword = bcrypt.hashSync(
+        updateUserDto.userPassword,
+        5
+      );
+    }
+
     const newUserData = await this.userRepository.preload({
-      userEmail: userEmail,
-      ...updateUserDto
+      userId: id,
+      ...updateUserDto,
     });
 
-    if (!newUserData) throw new NotFoundException("No se encontro el usuario");
+    if (!newUserData) {
+      throw new NotFoundException(`User with id ${id} not found`);
+    }
 
-    this.userRepository.save(newUserData);
+    await this.userRepository.save(newUserData);
+
     return newUserData;
   }
 }

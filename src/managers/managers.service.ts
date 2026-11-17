@@ -20,6 +20,7 @@ export class ManagersService {
     return this.managerRepository.find({
       relations: {
         location: true,
+        user: true,
       },
     });
   }
@@ -28,9 +29,11 @@ export class ManagersService {
     const manager = await this.managerRepository.findOne({
       where: {
         managerId: id,
+        
       },
       relations: {
         location: true,
+        user: true
       },
     });
 

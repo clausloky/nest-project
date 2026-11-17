@@ -37,6 +37,7 @@ export class EmployeesService {
     const employees = await this.employeeRepository.find({
       relations: {
         location: true,
+        user: true
       },
     });
     return this.resolveLocations(employees);
@@ -59,6 +60,7 @@ export class EmployeesService {
       },
       relations: {
         location: true,
+        user: true
       },
     });
 

@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Patch, Param, Res, Logger } from '@nestjs/common';
+import { Controller, Post, Body, Patch, Param, Res, Logger, Query } from '@nestjs/common';
 import { AuthService } from './auth.service.js';
 import { UpdateUserDto } from './dto/update-user.dto.js';
 import { LoginUserDto } from './dto/login-user.dto.js';
@@ -16,39 +16,26 @@ export class AuthController {
 
   constructor(private readonly authService: AuthService) {}
 
-  @Post("register/employee/:id")
-  registerEmployee(
+  @Post("register/:id")
+  register(
+    @Query("role") role: string,
     @Body() createUserDto: CreateUserDto,
     @Param("id") id: string,
   ) {
-    if (
-      !createUserDto.userRoles.includes("Admin") &&
-      !createUserDto.userRoles.includes("Employee")
-    ) {
-      throw new BadRequestException("Rol inválido");
+    if (role === "manager") {
+      return this.authService.registerManager(
+        id,
+        createUserDto,
+      );
+    } else if (role === "employee") {
+      return this.authService.registerEmployee(
+        id,
+        createUserDto,
+      );
     }
 
-    return this.authService.registerEmployee(
-      id,
-      createUserDto,
-    );
-  }
-
-  @Post("register/manager/:id")
-  registerManager(
-    @Body() createUserDto: CreateUserDto,
-    @Param("id") id: string,
-  ) {
-    if (
-      !createUserDto.userRoles.includes("Admin") &&
-      !createUserDto.userRoles.includes("Manager")
-    ) {
-      throw new BadRequestException("Rol inválido");
-    }
-
-    return this.authService.registerManager(
-      id,
-      createUserDto,
+    throw new BadRequestException(
+      "Rol inválido",
     );
   }
 
@@ -68,9 +55,9 @@ export class AuthController {
     return { ok: result.ok, message: result.message };
   }
 
-  @Patch("/:email")
-  updateUser(@Param("email") userEmail: string, @Body() updateUserDto: UpdateUserDto) {
-    return this.authService.updateUser(userEmail, updateUserDto);
+  @Patch("/:id")
+  updateUser(@Param("id") userId: string, @Body() updateUserDto: UpdateUserDto) {
+    return this.authService.updateUser(userId, updateUserDto);
   }
 
 }
